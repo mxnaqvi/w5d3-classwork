@@ -2,9 +2,9 @@ require 'singleton'
 require 'sqlite3'
 
 class QuestionsDatabase < SQLite3::Database
-include 'Singleton'
+include Singleton
   def intialize
-    super ('questions.db')
+    super('questions.db')
     self.type_translation = true
     self.results_as_hash = true
   end
@@ -19,7 +19,7 @@ class User
     end
 
     def self.find_by_id(target)
-        raise 'id doesn\'t exist' unless self.id
+        # raise 'id doesn\'t exist' unless self.id
         user = QuestionsDatabase.instance.execute(<<-SQL, target)
             SELECT
                 *
@@ -32,16 +32,19 @@ class User
     end
 
     def self.find_by_name(fname_target, lname_target)
-        raise 'name doesn\'t exist' unless self.fname && self.lname
-        user = QuestionsDatabase.instance.execute(<<-SQL, fname_target, lname_target)
+        puts fname_target 
+        puts lname_target
+        query = <<-SQL 
             SELECT
                 *
             FROM
                 users
             WHERE
-                fname = ?
-                lname = ?
+                fname = fname_target AND lname = lname_target;
         SQL
+        puts query
+        user = QuestionsDatabase.instance.execute(query)
+        puts user
         User.new(user)
     end
 end
