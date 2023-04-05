@@ -3,7 +3,7 @@ require 'sqlite3'
 
 class QuestionsDatabase < SQLite3::Database
 include Singleton
-  def intialize
+  def initialize
     super('questions.db')
     self.type_translation = true
     self.results_as_hash = true
@@ -12,7 +12,7 @@ end
 
 class User
     attr_accessor :id, :fname, :lname
-    def intialize(options)
+    def initialize(options)
         @id = options['id']
         @fname = options['fname']
         @lname = options['lname']
@@ -26,33 +26,28 @@ class User
             FROM
                 users
             WHERE
-                id = ?
+                id = ?;
         SQL
         User.new(user)
     end
 
     def self.find_by_name(fname_target, lname_target)
-        puts fname_target 
-        puts lname_target
-        query = <<-SQL 
+        user = QuestionsDatabase.instance.execute(<<-SQL, fname_target, lname_target)
             SELECT
                 *
             FROM
                 users
             WHERE
-                fname = fname_target AND lname = lname_target;
+                fname = ? AND lname = ?;
         SQL
-        puts query
-        user = QuestionsDatabase.instance.execute(query)
-        puts user
-        User.new(user)
+        User.new(user.first)
     end
 end
 
 class Question
     attr_accessor :id, :title, :body, :associated_author
 
-    def intialize(options)
+    def initialize(options)
         @id = options['id']
         @title = options['title']
         @body = options['body']
@@ -60,44 +55,43 @@ class Question
     end
 
     def self.find_by_id(target)
-        raise 'id doesn\'t exist' unless self.id
+        # raise 'id doesn\'t exist' unless self.id
         question = QuestionsDatabase.instance.execute(<<-SQL, target)
             SELECT
                 *
             FROM
                 questions
             WHERE
-                id = ?
+                id = ?;
         SQL
-        Question.new(question)
+        Question.new(question.first)
     end
 end
 
 class QuestionFollow
     attr_accessor :id, :questions_id, :users_id
-    def intialize(options)
+    def initialize(options)
         @id = options['id']
         @questions_id = options['questions_id']
         @users_id = options['users_id']
     end
 
     def self.find_by_id(target)
-        raise 'id doesn\'t exist' unless self.id
         questionfollow = QuestionsDatabase.instance.execute(<<-SQL, target)
             SELECT
                 *
             FROM
                 question_follows
             WHERE
-                id = ?
+                id = ?;
         SQL
-        QuestionFollow.new(questionfollow)
+        QuestionFollow.new(questionfollow.first)
     end
 end
 
 class Reply
     attr_accessor :id, :users_id, :questions_id, :replies_id
-    def intialize
+    def initialize(options)
         @id = options['id']
         @questions_id = options['questions_id']
         @users_id = options['users_id']
@@ -105,37 +99,37 @@ class Reply
     end
 
     def self.find_by_id(target)
-        raise 'id doesn\'t exist' unless self.id
         reply = QuestionsDatabase.instance.execute(<<-SQL, target)
             SELECT
                 *
             FROM
                 replies
             WHERE
-                id = ?
+                id = ?;
         SQL
-        Reply.new(reply)
+        Reply.new(reply.first)
     end
 end
 
 class QuestionLike
-    attr_accessor :liked, :users_id, :questions_id
-    def intialize 
+    attr_accessor :id, :liked, :users_id, :questions_id
+    def initialize 
+        @id = options['id']
         @liked = options['liked']
         @users_id = options['users_id']
         @questions_id = options['question_id']
     end
 
     def self.find_by_id(target)
-        raise 'id doesn\'t exist' unless self.id
         questionlike = QuestionsDatabase.instance.execute(<<-SQL, target)
             SELECT
                 *
             FROM
                 question_likes
             WHERE
-                id = ?
+                id = ?;
         SQL
-        QuestionLike.new(questionlike)
+        QuestionLike.new(questionlike.first)
     end
 end
+

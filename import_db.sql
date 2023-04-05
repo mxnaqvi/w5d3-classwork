@@ -47,6 +47,7 @@ CREATE TABLE replies (
 
 
 CREATE TABLE question_likes (
+    id INTEGER PRIMARY KEY,
     liked BOOLEAN NOT NULL,
     users_id INTEGER NOT NULL,
     question_id INTEGER NOT NULL,
@@ -80,11 +81,11 @@ VALUES
     (4, 4, 4);
 
 INSERT INTO
-    question_likes (liked, users_id, question_id)
+    question_likes (id, liked, users_id, question_id)
 VALUES
-    (true, 1, 4), 
-    (true, 3, 1), 
-    (true, 4, 2);
+    (1, true, 1, 4), 
+    (2, true, 3, 1), 
+    (3, true, 4, 2);
 
     INSERT INTO 
     replies (id, users_id, question_id, body, replies_id)
