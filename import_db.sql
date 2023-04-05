@@ -23,7 +23,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE question_follows (
-    id INTEGER PRIMARY KEY, 
+    ord INTEGER PRIMARY KEY, 
     question_id INTEGER NOT NULL,
     users_id INTEGER NOT NULL,
 
@@ -34,7 +34,7 @@ CREATE TABLE question_follows (
 
 
 CREATE TABLE replies (
-    id INTEGER PRIMARY KEY,
+    seq_id INTEGER PRIMARY KEY,
     users_id INTEGER NOT NULL,
     question_id INTEGER NOT NULL,
     body TEXT NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE replies (
 
     FOREIGN KEY(question_id) REFERENCES questions(id)
     FOREIGN KEY(users_id) REFERENCES users(id)
-    FOREIGN KEY(replies_id) REFERENCES replies(id)
+    FOREIGN KEY(replies_id) REFERENCES replies(seq_id)
 );
 
 
@@ -73,7 +73,7 @@ VALUES
     (4, 'stretch', 'how do I become more flexible', 4);
 
 INSERT INTO 
-    question_follows (id, question_id, users_id)
+    question_follows (ord, question_id, users_id)
 VALUES
     (1, 1, 1), 
     (2, 2, 2), 
@@ -87,8 +87,8 @@ VALUES
     (2, true, 3, 1), 
     (3, true, 4, 2);
 
-    INSERT INTO 
-    replies (id, users_id, question_id, body, replies_id)
+INSERT INTO 
+    replies (seq_id, users_id, question_id, body, replies_id)
 VALUES
     (1, 2, 1, 'it means hi', NULL),
     (2, 3, 1, 'no, it means more ramen please', 1),

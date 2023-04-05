@@ -19,7 +19,6 @@ class User
     end
 
     def self.find_by_id(target)
-        # raise 'id doesn\'t exist' unless self.id
         user = QuestionsDatabase.instance.execute(<<-SQL, target)
             SELECT
                 *
@@ -42,6 +41,10 @@ class User
         SQL
         User.new(user.first)
     end
+
+    def authored_questions
+        Question.find_by_associated_author(self.id)
+    end
 end
 
 class Question
@@ -55,7 +58,6 @@ class Question
     end
 
     def self.find_by_id(target)
-        # raise 'id doesn\'t exist' unless self.id
         question = QuestionsDatabase.instance.execute(<<-SQL, target)
             SELECT
                 *
@@ -66,13 +68,25 @@ class Question
         SQL
         Question.new(question.first)
     end
+
+    def self.find_by_associated_author(target)
+        question = QuestionsDatabase.instance.execute(<<-SQL, target)
+        SELECT
+            *
+        FROM
+            questions
+        WHERE
+            associated_author = ?;
+    SQL
+    Question.new(question.first)
+    end
 end
 
 class QuestionFollow
-    attr_accessor :id, :questions_id, :users_id
+    attr_accessor :ord, :question_id, :users_id
     def initialize(options)
-        @id = options['id']
-        @questions_id = options['questions_id']
+        @ord = options['ord']
+        @question_id = options['question_id']
         @users_id = options['users_id']
     end
 
@@ -83,17 +97,17 @@ class QuestionFollow
             FROM
                 question_follows
             WHERE
-                id = ?;
+                ord = ?;
         SQL
         QuestionFollow.new(questionfollow.first)
     end
 end
 
 class Reply
-    attr_accessor :id, :users_id, :questions_id, :replies_id
+    attr_accessor :seq_id, :users_id, :question_id, :replies_id
     def initialize(options)
-        @id = options['id']
-        @questions_id = options['questions_id']
+        @seq_id = options['seq_id']
+        @question_id = options['question_id']
         @users_id = options['users_id']
         @replies_id = options['replies_id']
     end
@@ -105,10 +119,36 @@ class Reply
             FROM
                 replies
             WHERE
-                id = ?;
+                seq_id = ?;
         SQL
         Reply.new(reply.first)
     end
+
+    
+    def self.find_by_user_id(target)
+        reply = QuestionsDatabase.instance.execute(<<-SQL, target)
+            SELECT
+                *
+            FROM
+                replies
+            WHERE
+                users_id = ?;
+        SQL
+        Reply.new(reply.first)
+    end
+
+    def self.find_by_question_id(target)
+        reply = QuestionsDatabase.instance.execute(<<-SQL, target)
+            SELECT
+                *
+            FROM
+                replies
+            WHERE
+                question_id = ?;
+        SQL
+        Reply.new(reply.first)
+    end
+
 end
 
 class QuestionLike
