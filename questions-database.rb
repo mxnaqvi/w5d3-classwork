@@ -27,7 +27,7 @@ class User
             WHERE
                 id = ?;
         SQL
-        User.new(user)
+        User.new(user.first)
     end
 
     def self.find_by_name(fname_target, lname_target)
@@ -44,6 +44,10 @@ class User
 
     def authored_questions
         Question.find_by_associated_author(self.id)
+    end
+
+    def authored_replies
+        Reply.find_by_user_id(self.id)
     end
 end
 
@@ -77,8 +81,16 @@ class Question
             questions
         WHERE
             associated_author = ?;
-    SQL
-    Question.new(question.first)
+        SQL
+        Question.new(question.first)
+    end
+
+    def author  
+        User.find_by_id(self.associated_author)
+    end
+
+    def replies
+        Reply.find_by_question_id(self.id)
     end
 end
 
@@ -149,6 +161,31 @@ class Reply
         Reply.new(reply.first)
     end
 
+    def parent_reply
+      if self.replies_id.nil?
+        raise 'no parent' 
+      end
+        Reply.find_by_id(self.replies_id)
+    end
+
+    def child_reply
+        if !self.replies_id.nil?
+            raise_error 'no child'
+        end
+        target = self.seq_id
+       reply =  QuestionsDatabase.instance.execute(<<-SQL, target)
+            SELECT
+                *
+            FROM
+                replies
+            WHERE
+                replies_id = ?;
+        SQL
+     if reply.nil?
+        raise_error 'no child'
+     end
+         Reply.new(reply.first)
+    end
 end
 
 class QuestionLike
